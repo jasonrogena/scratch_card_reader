@@ -36,7 +36,7 @@ public class MainActivity extends Activity implements OnClickListener
 {
 	public static final String DATA_PATH ="/sdcard/";// Environment.getExternalStorageDirectory().toString();
 	
-	private Preview preview;
+	private Preview preview=null;
 	private Camera camera;
 	private FrameLayout previewFrameLayout;
 	private View upperLimit;
@@ -55,10 +55,13 @@ public class MainActivity extends Activity implements OnClickListener
 	protected void onResume() 
     {
 		super.onResume();
-		preview=new Preview(this);
-        previewFrameLayout=(FrameLayout)this.findViewById(R.id.preview);
-        previewFrameLayout.addView(preview);
-        previewFrameLayout.setOnClickListener(this);
+		if(preview==null)
+		{
+			preview=new Preview(this);
+	        previewFrameLayout=(FrameLayout)this.findViewById(R.id.preview);
+	        previewFrameLayout.addView(preview);
+	        previewFrameLayout.setOnClickListener(this);
+		}
         
 		upperLimit=(View)this.findViewById(R.id.upper_limit);
 		lowerLimit=(View)this.findViewById(R.id.lower_limit);
@@ -99,6 +102,4 @@ public class MainActivity extends Activity implements OnClickListener
 		}
 	}
 	
-	
-    
 }

@@ -1,7 +1,6 @@
 package org.cgiar.ilri.lab;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +8,7 @@ import java.io.OutputStream;
 import java.util.List;
 import com.googlecode.tesseract.android.TessBaseAPI;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,7 +23,9 @@ import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -122,7 +124,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback
 	{
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
-		camera = Camera.open();
+		camera=Camera.open();
 		Log.d("CAMERA", "camera opened");
 		try 
 		{
@@ -132,27 +134,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback
 
 				public void onPreviewFrame(byte[] data, Camera arg1)
 				{
-					/*FileOutputStream outStream = null;
-					try 
-					{
-						outStream = new FileOutputStream(String.format(
-								"/sdcard/%d.jpg", System.currentTimeMillis()));
-						outStream.write(data);
-						outStream.close();
-						Log.d(TAG, "onPreviewFrame - wrote bytes: "
-								+ data.length);
-					} 
-					catch (FileNotFoundException e) 
-					{
-						e.printStackTrace();
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					} 
-					finally
-					{
-					}*/
 					Preview.this.invalidate();
 				}
 			});
@@ -166,8 +147,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback
 		// Surface will be destroyed when we return, so stop the preview.
 		// Because the CameraDevice object is not a shared resource, it's very
 		// important to release it when the activity is paused.
+		Log.d("CAMERA", "Surface destroyed called");
 		camera.stopPreview();
-		camera = null;
+		camera.setPreviewCallback(null);
+		camera.release();
+		camera=null;
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -207,13 +191,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback
 		camera.setParameters(parameters);
 		camera.setDisplayOrientation(90);
 		camera.startPreview();
-		//autoFocus();
-		//camera.autoFocus(autoFocusCallback);
 	}
 	
 	public void autoFocus()
 	{
-		camera.autoFocus(autoFocusCallback);
+		if(camera!=null)
+		{
+			camera.autoFocus(autoFocusCallback);
+		}
 	}
 	
 	public int getHeightOfCamera()
@@ -262,8 +247,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback
 				int croppedHeight=(int)(rotatedImage.getHeight()*activeImageHeight);
 				int y=halfHeight-(int)(croppedHeight/2);
 				Bitmap croppedImage=Bitmap.createBitmap(rotatedImage, 0, y, rotatedImage.getWidth(), croppedHeight);
-				croppedImage.compress(CompressFormat.JPEG, 100, outStream);
-				outStream.close();
+				//croppedImage.compress(CompressFormat.JPEG, 100, outStream);
+				//outStream.close();
 				Log.d("CAMERA", "cropped image width = "+String.valueOf(croppedImage.getWidth()));
 				if (!(new File(MainActivity.DATA_PATH + "tessdata/eng.traineddata")).exists()) 
 				{
@@ -333,9 +318,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback
 			if(result!=null)
 			{
 				Log.d("CAMERA", result);
-				if(result.length()==16||result.length()==15)
+				TelephonyManager telephonyManager=((TelephonyManager)Preview.this.getContext().getSystemService(Context.TELEPHONY_SERVICE));
+				String operatorName=telephonyManager.getNetworkOperatorName();
+				Log.d("CAMERA", "operator = "+operatorName);
+				if(result.length()==16 && operatorName.equals("Safaricom"))
 				{
-					Toast.makeText(Preview.this.getContext(), result+" nice!!", Toast.LENGTH_LONG).show();
+					//Toast.makeText(Preview.this.getContext(), "on Safaricom "+result, Toast.LENGTH_LONG).show();
+					Intent intent=new Intent(Intent.ACTION_DIAL);
+					intent.setData(Uri.fromParts("tel", "*141*"+result+"#", "#"));
+					Preview.this.getContext().startActivity(intent);
+				}
+				else if(result.length()==15 && operatorName.equals("Celtel"))//TODO:change this to celtel
+				{
+					Intent intent=new Intent(Intent.ACTION_DIAL);
+					intent.setData(Uri.fromParts("tel", "*122*"+result+"#", "#"));
+					Preview.this.getContext().startActivity(intent);
 				}
 			}
 			idle=true;
