@@ -29,18 +29,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener
 {
-	public static final String DATA_PATH ="/sdcard/";// Environment.getExternalStorageDirectory().toString();
+	public static final String DATA_PATH = Environment.getExternalStorageDirectory()+File.separator;
 	
 	private Preview preview=null;
 	private Camera camera;
 	private FrameLayout previewFrameLayout;
-	private View upperLimit;
-	private View lowerLimit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) 
@@ -57,14 +56,15 @@ public class MainActivity extends Activity implements OnClickListener
 		super.onResume();
 		if(preview==null)
 		{
-			preview=new Preview(this);
-	        previewFrameLayout=(FrameLayout)this.findViewById(R.id.preview);
+			RelativeLayout mainLayout=(RelativeLayout)this.findViewById(R.id.main_layout);
+			View upperLimit=(View)this.findViewById(R.id.upper_limit);
+			View lowerLimit=(View)this.findViewById(R.id.lower_limit);
+			ImageView lastImageIV = (ImageView)this.findViewById(R.id.last_image);
+			previewFrameLayout=(FrameLayout)this.findViewById(R.id.preview);
+			preview=new Preview(this,mainLayout,previewFrameLayout,upperLimit,lowerLimit,lastImageIV);
 	        previewFrameLayout.addView(preview);
 	        previewFrameLayout.setOnClickListener(this);
 		}
-        
-		upperLimit=(View)this.findViewById(R.id.upper_limit);
-		lowerLimit=(View)this.findViewById(R.id.lower_limit);
 		/*int previewHeight=preview.getHeightOfCamera();
 		if(previewHeight!=-1)
 		{
