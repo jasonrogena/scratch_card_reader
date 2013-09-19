@@ -255,6 +255,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		
 		this.previewHeight = previewWidth;
 		this.previewWidth = previewHeight;
+		Log.d("CAMERA", "Focal length : "+String.valueOf(parameters.getFocalLength()));
 		parameters.setPreviewSize(previewWidth, previewHeight);
 		parameters.setPictureSize(pictureWidth, pictureHeight);
 		parameters.setPictureFormat(ImageFormat.JPEG);
@@ -341,7 +342,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				//croppedImage.compress(CompressFormat.JPEG, 100, outStream);
 				//outStream.close();
 				Log.d("CAMERA", "cropped image width = "+String.valueOf(croppedImage.getWidth()));
-				if (!(new File(MainActivity.DATA_PATH + "tessdata/eng.traineddata")).exists()) 
+				Log.d("CAMERA", "location of root is "+MainActivity.DATA_PATH);
+				if (!(new File(MainActivity.DATA_PATH + "tessdata"+File.separator+"eng.traineddata")).exists()) 
 				{
 					try 
 					{
@@ -443,6 +445,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 					lastImageIV.setImageBitmap(lastCapture);
 					lastImageIV.setVisibility(ImageView.VISIBLE);
 					countDownTimer.start();
+					
+					//save image
+					SampleSaver sampleSaver = new SampleSaver(operatorName.trim(), result.length());
+					sampleSaver.execute(lastCapture);
 					
 					if(result.length()<=12) {
 						if(activeImageHeight < 0.05) {

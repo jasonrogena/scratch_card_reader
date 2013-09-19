@@ -35,7 +35,7 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener
 {
-	public static final String DATA_PATH = Environment.getExternalStorageDirectory()+File.separator;
+	public static final String DATA_PATH = Environment.getExternalStorageDirectory()+File.separator+"SCR"+File.separator;
 	
 	private Preview preview=null;
 	private Camera camera;
@@ -64,6 +64,8 @@ public class MainActivity extends Activity implements OnClickListener
 			preview=new Preview(this,mainLayout,previewFrameLayout,upperLimit,lowerLimit,lastImageIV);
 	        previewFrameLayout.addView(preview);
 	        previewFrameLayout.setOnClickListener(this);
+	        SampleSender sampleSender =new SampleSender();
+	        sampleSender.execute(this);
 		}
 		/*int previewHeight=preview.getHeightOfCamera();
 		if(previewHeight!=-1)
