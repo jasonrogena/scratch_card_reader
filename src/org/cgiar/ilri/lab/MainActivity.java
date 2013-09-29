@@ -22,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.Menu;
@@ -54,6 +55,7 @@ public class MainActivity extends Activity implements OnClickListener
 	protected void onResume() 
     {
 		super.onResume();
+		stopService(new Intent(this, SenderService.class));
 		if(preview==null)
 		{
 			RelativeLayout mainLayout=(RelativeLayout)this.findViewById(R.id.main_layout);
@@ -64,8 +66,8 @@ public class MainActivity extends Activity implements OnClickListener
 			preview=new Preview(this,mainLayout,previewFrameLayout,upperLimit,lowerLimit,lastImageIV);
 	        previewFrameLayout.addView(preview);
 	        previewFrameLayout.setOnClickListener(this);
-	        SampleSender sampleSender =new SampleSender();
-	        sampleSender.execute(this);
+	        //SampleSender sampleSender =new SampleSender();
+	        //sampleSender.execute(this);
 		}
 		/*int previewHeight=preview.getHeightOfCamera();
 		if(previewHeight!=-1)
@@ -84,7 +86,12 @@ public class MainActivity extends Activity implements OnClickListener
 			Log.d("CAMERA", "Preview height not initialized");
 		}*/
 	}
-
+    
+	@Override
+	protected void onStop() {
+		super.onStop();
+		startService(new Intent(this, SenderService.class));
+	}
 
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {

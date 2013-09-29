@@ -32,6 +32,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service 
+            android:name="SenderService"
+            android:icon="@drawable/ic_launcher"
+            android:label="SenderService"></service>
     </application>
 
 </manifest>

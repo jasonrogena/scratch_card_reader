@@ -23,7 +23,7 @@ public class SampleSaver extends AsyncTask<Bitmap, Integer, Boolean> {
 	}
 	@Override
 	protected Boolean doInBackground(Bitmap... params) {
-		if(noOfCharacters>8 && noOfCharacters <30) {
+		if(noOfCharacters>2 && noOfCharacters <35) {
 			// check if dir exists
 			File samplesDir = new File(MainActivity.DATA_PATH + SAMPLE_DIR+File.separator+operator+File.separator);
 			if (!samplesDir.exists()) {
@@ -55,8 +55,8 @@ public class SampleSaver extends AsyncTask<Bitmap, Integer, Boolean> {
 			Date date=new Date();
 			String timestamp=String.valueOf(date.getTime());
 			try {
-				FileOutputStream out=new FileOutputStream(MainActivity.DATA_PATH + SAMPLE_DIR+File.separator+operator+File.separator+timestamp+".jpg");
-				params[0].compress(CompressFormat.JPEG, 100, out);
+				FileOutputStream out=new FileOutputStream(MainActivity.DATA_PATH + SAMPLE_DIR+File.separator+operator+File.separator+timestamp+".png");
+				params[0].compress(CompressFormat.PNG, 100, out);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
