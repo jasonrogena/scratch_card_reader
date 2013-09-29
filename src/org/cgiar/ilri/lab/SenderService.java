@@ -67,14 +67,14 @@ public class SenderService extends Service {
 	@Override
 	public void onDestroy() {
 		Log.d(TAG, "onDestroy called on SenderService");
-		checker.cancel(true);
+		checker.cancel(false);
 		super.onDestroy();
 	}
 
 	@Override
 	public void onLowMemory() {
 		super.onLowMemory();
-		checker.cancel(true);
+		checker.cancel(false);
 		this.stopSelf();
 	}
 	
@@ -93,6 +93,7 @@ public class SenderService extends Service {
 					}
 					else {
 						Log.d(TAG, "not connected to WIFI, not sending files");
+						break;
 					}
 					
 				}
@@ -123,8 +124,6 @@ public class SenderService extends Service {
 			}
 		}
 
-
-
 		private void sendSamples() {
 
 			TelephonyManager telephonyManager=((TelephonyManager)SenderService.this.getSystemService(Context.TELEPHONY_SERVICE));
@@ -134,11 +133,12 @@ public class SenderService extends Service {
 				File[] allImages = samplesDir.listFiles();
 				if(allImages.length >= SampleSaver.MAX_SIZE){
 					byte[] buffer = new byte[1024];
+					String zipFileName = null;
 					try {
 						Log.d(TAG, "SENDING ZIP FILE TO SERVER");
 						Date date = new Date();
 						
-						String zipFileName = MainActivity.DATA_PATH + SampleSaver.SAMPLE_DIR+File.separator+operatorName+File.separator+String.valueOf(date.getTime())+operatorName+".zip";
+						zipFileName = MainActivity.DATA_PATH + SampleSaver.SAMPLE_DIR+File.separator+operatorName+File.separator+String.valueOf(date.getTime())+operatorName+".zip";
 						FileOutputStream fos = new FileOutputStream(zipFileName);
 						ZipOutputStream zos = new ZipOutputStream(fos);
 						for(int i = 0; i < allImages.length; i++) {
@@ -202,19 +202,20 @@ public class SenderService extends Service {
 						fileInputStream.close();
 						outputStream.flush();
 						outputStream.close();
+						
+						Log.d(TAG, "deleting all files");
 						File file = new File(zipFileName);
 						file.delete();
 						for (int i = 0; i < allImages.length; i++) {
 							allImages[i].delete();
 						}
 					} 
-					catch (FileNotFoundException e) {
+					catch (Exception e) {
 						// TODO Auto-generated catch block
-						Log.e(TAG, e.getMessage());
-						e.printStackTrace();
-					} 
-					catch (IOException e) {
-						// TODO Auto-generated catch block
+						if(zipFileName!=null) {
+							File file = new File(zipFileName);
+							file.delete();
+						}
 						Log.e(TAG, e.getMessage());
 						e.printStackTrace();
 					}

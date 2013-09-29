@@ -41,6 +41,7 @@ public class MainActivity extends Activity implements OnClickListener
 	private Preview preview=null;
 	private Camera camera;
 	private FrameLayout previewFrameLayout;
+	private ImageView focusAreaImg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) 
@@ -56,6 +57,7 @@ public class MainActivity extends Activity implements OnClickListener
     {
 		super.onResume();
 		stopService(new Intent(this, SenderService.class));
+		focusAreaImg = (ImageView)this.findViewById(R.id.focus_area_img);
 		if(preview==null)
 		{
 			RelativeLayout mainLayout=(RelativeLayout)this.findViewById(R.id.main_layout);
@@ -107,6 +109,9 @@ public class MainActivity extends Activity implements OnClickListener
 	{
 		if(v==previewFrameLayout)
 		{
+			if(focusAreaImg.getVisibility() == ImageView.VISIBLE) {
+				focusAreaImg.setVisibility(ImageView.GONE);
+			}
 			preview.autoFocus();
 		}
 	}

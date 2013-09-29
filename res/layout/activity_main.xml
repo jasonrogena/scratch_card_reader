@@ -35,5 +35,17 @@
         android:layout_height="230dp"
         android:layout_alignParentBottom="true"
         android:background="#7f000000"/>
+    <ImageView 
+        android:id="@+id/limit_slide_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/slide"/>
+    <ImageView 
+        android:id="@+id/focus_area_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:src="@drawable/focus_area"/>
 
 </RelativeLayout>
