@@ -81,36 +81,21 @@ public class SenderService extends Service {
 	private class Checker extends AsyncTask<Integer, Integer, Integer> {
 		@Override
 		protected Integer doInBackground(Integer... params) {
-			while(true) {
-				ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
-				NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-				Log.d(TAG, "checking..");
-				if(sufficientNoOfFiles()) {
-					Log.d(TAG, "files sufficient");
-					if(mWifi.isConnected()) {
-						Log.d(TAG, "On wifi, sending files");
-						sendSamples();
-					}
-					else {
-						Log.d(TAG, "not connected to WIFI, not sending files");
-						break;
-					}
-					
+			ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+			NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+			Log.d(TAG, "checking..");
+			if(sufficientNoOfFiles()) {
+				Log.d(TAG, "files sufficient");
+				if(mWifi.isConnected()) {
+					Log.d(TAG, "On wifi, sending files");
+					sendSamples();
 				}
 				else {
-					Log.d(TAG, "files not sufficient, breaking endless loop");
-					break;
+					Log.d(TAG, "not connected to WIFI, not sending files");
 				}
-				if(isCancelled()){
-					Log.d(TAG, "Killing the endless loop");
-					break;
-				}
-				try {
-					Thread.sleep(waitTime);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			}
+			else {
+				Log.d(TAG, "files not sufficient");
 			}
 			return 1;
 		}
@@ -213,6 +198,7 @@ public class SenderService extends Service {
 					catch (Exception e) {
 						// TODO Auto-generated catch block
 						if(zipFileName!=null) {
+							Log.d(TAG, "something went wrong, deleting zip file");
 							File file = new File(zipFileName);
 							file.delete();
 						}
