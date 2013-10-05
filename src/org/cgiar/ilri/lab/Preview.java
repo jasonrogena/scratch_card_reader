@@ -22,6 +22,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.ShutterCallback;
@@ -63,6 +64,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private int motionDownY;
 	private CountDownTimer countDownTimer;
 	private ImageView lastImageIV;
+	private AmbientLightManager ambientLightManager;
 
 	Preview(Context context, RelativeLayout mainLayout, FrameLayout previewFrameLayout, View upperLimit, View lowerLimit, ImageView lastImageIV) 
 	{
@@ -82,6 +84,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		mHolder = getHolder();
 		mHolder.addCallback(this);
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		
+		ambientLightManager =new AmbientLightManager(context);
 		
 		shutterCallback=new ShutterCallback()
         {
@@ -165,6 +169,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 					Preview.this.invalidate();
 				}
 			});
+			ambientLightManager.startMonitoring(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -176,10 +181,23 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		// Because the CameraDevice object is not a shared resource, it's very
 		// important to release it when the activity is paused.
 		Log.d("CAMERA", "Surface destroyed called");
+		ambientLightManager.stopMonitoring();
 		camera.stopPreview();
 		camera.setPreviewCallback(null);
 		camera.release();
 		camera=null;
+	}
+	
+	public void pause() {
+		if(camera!=null){
+			camera.stopPreview();
+		}
+	}
+	
+	public void resume(){
+		if(camera!=null){
+			camera.startPreview();
+		}
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -296,6 +314,19 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	public int getHeightOfCamera()
 	{
 		return heightOfCamera;
+	}
+	
+	public void setTorch(boolean toOn){
+		if(camera!=null){
+			Parameters parameters = camera.getParameters();
+			if(toOn){
+				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+			}
+			else{
+				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+			}
+			camera.setParameters(parameters);
+		}
 	}
 
 	@Override

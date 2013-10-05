@@ -71,24 +71,19 @@ public class MainActivity extends Activity implements OnClickListener
 	        //SampleSender sampleSender =new SampleSender();
 	        //sampleSender.execute(this);
 		}
-		/*int previewHeight=preview.getHeightOfCamera();
-		if(previewHeight!=-1)
-		{
-			Log.d("CAMERA", "Fetched preview height "+String.valueOf(previewHeight));
-			ViewGroup.LayoutParams upperLimitLP=upperLimit.getLayoutParams();
-			ViewGroup.LayoutParams lowerLimitLP=lowerLimit.getLayoutParams();
-			int extraSpace=(int)(previewHeight*(1-activeImageHeight));
-			upperLimitLP.height=(int)(extraSpace/2);
-			lowerLimitLP.height=(int)(extraSpace/2);
-			upperLimit.setLayoutParams(upperLimitLP);
-			lowerLimit.setLayoutParams(lowerLimitLP);
+		else{
+			preview.resume();
 		}
-		else
-		{
-			Log.d("CAMERA", "Preview height not initialized");
-		}*/
 	}
     
+    
+    
+	@Override
+	protected void onPause() {
+		preview.pause();
+		super.onPause();
+	}
+
 	@Override
 	protected void onStop() {
 		super.onStop();
