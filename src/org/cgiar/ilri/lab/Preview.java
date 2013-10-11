@@ -55,6 +55,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private PictureCallback rawCallback;
 	private PictureCallback jpegCallback;
 	private double activeImageHeight=0.1;//ration of active height on a total image height
+	private double activeImageWidth=0.8;
 	private int previewHeight = -1;
 	private int previewWidth = -1;
 	private boolean idle=true;
@@ -66,6 +67,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private FrameLayout previewFrameLayout;
 	private boolean canResizeFlag = false;
 	private int motionDownY;
+	private int motionX;
 	private CountDownTimer countDownTimer;
 	private ImageView lastImageIV;
 	private AmbientLightManager ambientLightManager;
@@ -84,7 +86,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		this.lowerLimit.setOnLongClickListener(this);
 		this.lowerLimit.setOnTouchListener(this);
 		this.leftLimit = leftLimit;
+		this.leftLimit.setOnTouchListener(this);
 		this.rightLimit = rightLimit;
+		this.rightLimit.setOnTouchListener(this);
 		this.lastImageIV=lastImageIV;
 		this.previewFrameLayout=previewFrameLayout;
 		mHolder = getHolder();
@@ -303,15 +307,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		camera.setParameters(parameters);
 		camera.setDisplayOrientation(90);
 		camera.startPreview();
-		resetLimits();
+		resetYLimits();
+		resetXLimits();
 	}
 	
-	private void resetLimits() {
+	private void resetYLimits() {
 		if(activeImageHeight < 0) activeImageHeight = 0;
 		else if(activeImageHeight > 0.8) activeImageHeight = 0.8;
-		Log.d("CAMERA", "Active main layout height ratio = "+String.valueOf(activeImageHeight));
+		//Log.d("CAMERA", "Active main layout height ratio = "+String.valueOf(activeImageHeight));
 		int activeHeight = (int)((double)previewFrameLayout.getHeight() * activeImageHeight);
-		Log.d("CAMERA", "active main layout height :"+String.valueOf(activeHeight));
+		//Log.d("CAMERA", "active main layout height :"+String.valueOf(activeHeight));
 		int limitHeight = (previewFrameLayout.getHeight() - activeHeight)/2;
 		LayoutParams upperLimitLP = upperLimit.getLayoutParams();
 		upperLimitLP.height = limitHeight;
@@ -324,6 +329,20 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		leftLimit.setLayoutParams(leftLimitLP);
 		LayoutParams rightLimitLP = rightLimit.getLayoutParams();
 		rightLimitLP.height = activeHeight+1;
+		rightLimit.setLayoutParams(rightLimitLP);
+	}
+	
+	private void resetXLimits(){
+		if(activeImageWidth < 0) activeImageWidth = 0;
+		else if(activeImageWidth > 0.9) activeImageWidth = 0.9;
+		
+		int activeWidth = (int)((double)previewFrameLayout.getWidth()*activeImageWidth);
+		int limitWidth = (previewFrameLayout.getWidth() - activeWidth)/2;
+		LayoutParams leftLimitLP = leftLimit.getLayoutParams();
+		leftLimitLP.width = limitWidth;
+		leftLimit.setLayoutParams(leftLimitLP);
+		LayoutParams rightLimitLP = rightLimit.getLayoutParams();
+		rightLimitLP.width = limitWidth;
 		rightLimit.setLayoutParams(rightLimitLP);
 	}
 	
@@ -385,8 +404,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 			try
 			{
 				//FileOutputStream outStream = new FileOutputStream(String.format(MainActivity.DATA_PATH+"%d.jpg", System.currentTimeMillis()));
-				double compensation = (previewFrameLayout.getHeight() - previewHeight) / previewFrameLayout.getHeight();
-				double activeImageHeight = Preview.this.activeImageHeight - compensation;
+				double yCompensation = (previewFrameLayout.getHeight() - previewHeight) / previewFrameLayout.getHeight();
+				double activeImageHeight = Preview.this.activeImageHeight - yCompensation;
+				
+				double xCompensation = (previewFrameLayout.getWidth() - previewWidth) / previewFrameLayout.getWidth();
+				double activeImageWidth = Preview.this.activeImageWidth - xCompensation;
+				
 				Log.d("CAMERA", "byte size = "+String.valueOf(data[0].length));
 				Bitmap bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
 				Matrix matrix=new Matrix();
@@ -395,7 +418,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				int halfHeight=(int)rotatedImage.getHeight()/2;
 				int croppedHeight=(int)(rotatedImage.getHeight()*activeImageHeight);
 				int y=halfHeight-(int)(croppedHeight/2);
-				Bitmap croppedImage=Bitmap.createBitmap(rotatedImage, 0, y, rotatedImage.getWidth(), croppedHeight);
+				
+				int halfWidth=(int)rotatedImage.getWidth()/2;
+				int croppedWidth=(int)(rotatedImage.getWidth()*activeImageWidth);
+				int x =halfWidth-(int)(croppedWidth/2);
+				
+				Bitmap croppedImage=Bitmap.createBitmap(rotatedImage, x, y, croppedWidth, croppedHeight);
 				//croppedImage.compress(CompressFormat.JPEG, 100, outStream);
 				//outStream.close();
 				Log.d("CAMERA", "cropped image width = "+String.valueOf(croppedImage.getWidth()));
@@ -545,31 +573,60 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		}
 		else if(event.getAction() == MotionEvent.ACTION_DOWN) {
 			canResizeFlag=true;
-			motionDownY = (int) event.getRawY();
+			if(v==upperLimit || v==lowerLimit){
+				motionDownY = (int) event.getRawY();
+			}
+			else if(v==rightLimit || v==leftLimit){
+				motionX = (int) event.getRawX();
+			}
 		}
 		else if(event.getAction() == MotionEvent.ACTION_MOVE) {
 			if(canResizeFlag) {
-				int nowY = (int) event.getRawY();
-				boolean increaseActiveHeight = false;
-				if(v == upperLimit && motionDownY > nowY) {
-					increaseActiveHeight = true;
+				if(v==upperLimit || v==lowerLimit) {
+					int nowY = (int) event.getRawY();
+					boolean increaseActiveHeight = false;
+					if(v == upperLimit && motionDownY > nowY) {
+						increaseActiveHeight = true;
+					}
+					else if(v == lowerLimit && motionDownY < nowY) {
+						increaseActiveHeight = true;
+					}
+					int diff = Math.abs(nowY - motionDownY);
+					double effect = diff * 0.0025;
+					if(increaseActiveHeight) {
+						if((activeImageHeight+effect) < 1)
+							activeImageHeight = activeImageHeight + effect;
+					}
+					else
+					{
+						if((activeImageHeight-effect) > 0)
+							activeImageHeight = activeImageHeight - effect;
+					}
+					resetYLimits();
+					motionDownY = nowY;
 				}
-				else if(v == lowerLimit && motionDownY < nowY) {
-					increaseActiveHeight = true;
+				else if(v==rightLimit|| v==leftLimit){
+					int nowX = (int) event.getRawX();
+					boolean increaseActiveWidth = false;
+					if(v==leftLimit && motionX > nowX){
+						increaseActiveWidth = true;
+					}
+					else if(v == rightLimit && motionX < nowX){
+						increaseActiveWidth = true;
+					}
+					int diff = Math.abs(nowX - motionX);
+					double effect = diff * 0.0025;
+					if(increaseActiveWidth){
+						if((activeImageWidth+effect)<1)
+							activeImageWidth = activeImageWidth + effect;
+					}
+					else {
+						if((activeImageWidth-effect)>0)
+							activeImageWidth = activeImageWidth - effect;
+					}
+					resetXLimits();
+					motionX = nowX;
 				}
-				int diff = Math.abs(nowY - motionDownY);
-				double effect = diff * 0.0025;
-				if(increaseActiveHeight) {
-					if((activeImageHeight+effect) < 1)
-						activeImageHeight = activeImageHeight + effect;
-				}
-				else
-				{
-					if((activeImageHeight+effect) > 0)
-						activeImageHeight = activeImageHeight - effect;
-				}
-				resetLimits();
-				motionDownY = nowY;
 			}
 		}
 		return true;
