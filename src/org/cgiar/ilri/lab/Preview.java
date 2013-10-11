@@ -61,6 +61,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private RelativeLayout mainLayout;
 	private View upperLimit;
 	private View lowerLimit;
+	private View leftLimit;
+	private View rightLimit;
 	private FrameLayout previewFrameLayout;
 	private boolean canResizeFlag = false;
 	private int motionDownY;
@@ -68,7 +70,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private ImageView lastImageIV;
 	private AmbientLightManager ambientLightManager;
 
-	Preview(Context context, RelativeLayout mainLayout, FrameLayout previewFrameLayout, View upperLimit, View lowerLimit, ImageView lastImageIV) 
+	Preview(Context context, RelativeLayout mainLayout, FrameLayout previewFrameLayout, View upperLimit, View lowerLimit, View leftLimit, View rightLimit, ImageView lastImageIV) 
 	{
 		super(context);
 
@@ -81,6 +83,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		this.lowerLimit=lowerLimit;
 		this.lowerLimit.setOnLongClickListener(this);
 		this.lowerLimit.setOnTouchListener(this);
+		this.leftLimit = leftLimit;
+		this.rightLimit = rightLimit;
 		this.lastImageIV=lastImageIV;
 		this.previewFrameLayout=previewFrameLayout;
 		mHolder = getHolder();
@@ -281,11 +285,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		parameters.setPictureFormat(ImageFormat.JPEG);
 		parameters.setJpegQuality(100);
 		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+		parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
+		
 		Area centralFocusArea = new Area(new Rect(-10, -1000, 10, 1000), 1000);
 		//Area centralFocusArea = new Area(new Rect(-1000, -3, 1000, 3), 1000);
 		List<Area> focusAreas = new ArrayList<Camera.Area>();
+		List<Area> meteringAreas = new ArrayList<Camera.Area>();
 		focusAreas.add(centralFocusArea);
+		meteringAreas.add(centralFocusArea);
+		
 		parameters.setFocusAreas(focusAreas);
+		parameters.setMeteringAreas(meteringAreas);
+		Log.d("CAMERA", "layoutSize :"+String.valueOf(previewFrameLayout.getHeight())+" x "+String.valueOf(previewFrameLayout.getWidth()));
 		Log.d("CAMERA", "preview size :"+String.valueOf(previewWidth)+" x "+String.valueOf(previewHeight));
 		Log.d("CAMERA", "picture size :"+String.valueOf(pictureWidth)+" x "+String.valueOf(pictureHeight));
 		heightOfCamera=previewWidth;
@@ -296,18 +307,24 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	}
 	
 	private void resetLimits() {
-		if(previewHeight != -1) {
-			Log.d("CAMERA", "Active image height = "+String.valueOf(activeImageHeight));
-			int activeHeight = (int)((double)previewHeight * activeImageHeight);
-			Log.d("CAMERA", "active preview height :"+String.valueOf(activeHeight));
-			int limitHeight = (previewHeight - activeHeight)/2;
-			LayoutParams upperLimitLP = upperLimit.getLayoutParams();
-			upperLimitLP.height = limitHeight;
-			upperLimit.setLayoutParams(upperLimitLP);
-			LayoutParams lowerLimitLP = lowerLimit.getLayoutParams();
-			lowerLimitLP.height = limitHeight;
-			lowerLimit.setLayoutParams(lowerLimitLP);
-		}
+		if(activeImageHeight < 0) activeImageHeight = 0;
+		else if(activeImageHeight > 0.8) activeImageHeight = 0.8;
+		Log.d("CAMERA", "Active main layout height ratio = "+String.valueOf(activeImageHeight));
+		int activeHeight = (int)((double)previewFrameLayout.getHeight() * activeImageHeight);
+		Log.d("CAMERA", "active main layout height :"+String.valueOf(activeHeight));
+		int limitHeight = (previewFrameLayout.getHeight() - activeHeight)/2;
+		LayoutParams upperLimitLP = upperLimit.getLayoutParams();
+		upperLimitLP.height = limitHeight;
+		upperLimit.setLayoutParams(upperLimitLP);
+		LayoutParams lowerLimitLP = lowerLimit.getLayoutParams();
+		lowerLimitLP.height = limitHeight;
+		lowerLimit.setLayoutParams(lowerLimitLP);
+		LayoutParams leftLimitLP = leftLimit.getLayoutParams();
+		leftLimitLP.height = activeHeight+1;
+		leftLimit.setLayoutParams(leftLimitLP);
+		LayoutParams rightLimitLP = rightLimit.getLayoutParams();
+		rightLimitLP.height = activeHeight+1;
+		rightLimit.setLayoutParams(rightLimitLP);
 	}
 	
 	public void autoFocus()
@@ -368,6 +385,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 			try
 			{
 				//FileOutputStream outStream = new FileOutputStream(String.format(MainActivity.DATA_PATH+"%d.jpg", System.currentTimeMillis()));
+				double compensation = (previewFrameLayout.getHeight() - previewHeight) / previewFrameLayout.getHeight();
+				double activeImageHeight = Preview.this.activeImageHeight - compensation;
 				Log.d("CAMERA", "byte size = "+String.valueOf(data[0].length));
 				Bitmap bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
 				Matrix matrix=new Matrix();

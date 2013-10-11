@@ -63,9 +63,11 @@ public class MainActivity extends Activity implements OnClickListener
 			RelativeLayout mainLayout=(RelativeLayout)this.findViewById(R.id.main_layout);
 			View upperLimit=(View)this.findViewById(R.id.upper_limit);
 			View lowerLimit=(View)this.findViewById(R.id.lower_limit);
+			View leftLimit = (View)this.findViewById(R.id.left_limit);
+			View rightLimit = (View)this.findViewById(R.id.right_limit);
 			ImageView lastImageIV = (ImageView)this.findViewById(R.id.last_image);
 			previewFrameLayout=(FrameLayout)this.findViewById(R.id.preview);
-			preview=new Preview(this,mainLayout,previewFrameLayout,upperLimit,lowerLimit,lastImageIV);
+			preview=new Preview(this,mainLayout,previewFrameLayout,upperLimit,lowerLimit,leftLimit,rightLimit,lastImageIV);
 	        previewFrameLayout.addView(preview);
 	        previewFrameLayout.setOnClickListener(this);
 	        //SampleSender sampleSender =new SampleSender();

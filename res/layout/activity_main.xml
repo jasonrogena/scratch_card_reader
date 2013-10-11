@@ -47,5 +47,19 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:src="@drawable/focus_area"/>
+    <View 
+        android:id="@+id/left_limit"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:background="#7f000000"/>
+    <View 
+        android:id="@+id/right_limit"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="#7f000000"/>
 
 </RelativeLayout>
