@@ -1,0 +1,193 @@
+android.support.v4.app.BackStackState
+android.support.v4.app.BackStackState: android.os.Parcelable$Creator CREATOR
+android.support.v4.app.Fragment$SavedState
+android.support.v4.app.Fragment$SavedState: android.os.Parcelable$Creator CREATOR
+android.support.v4.app.FragmentManagerState
+android.support.v4.app.FragmentManagerState: android.os.Parcelable$Creator CREATOR
+android.support.v4.app.FragmentState
+android.support.v4.app.FragmentState: android.os.Parcelable$Creator CREATOR
+android.support.v4.app.FragmentTabHost: void setOnTabChangedListener(android.widget.TabHost$OnTabChangeListener)
+android.support.v4.app.FragmentTabHost$SavedState
+android.support.v4.app.FragmentTabHost$SavedState: android.os.Parcelable$Creator CREATOR
+android.support.v4.content.ModernAsyncTask$Status: android.support.v4.content.ModernAsyncTask$Status[] values()
+android.support.v4.content.ModernAsyncTask$Status: android.support.v4.content.ModernAsyncTask$Status valueOf(java.lang.String)
+android.support.v4.view.PagerTabStrip: void setTabIndicatorColor(int)
+android.support.v4.view.PagerTabStrip: void setTabIndicatorColorResource(int)
+android.support.v4.view.PagerTabStrip: int getTabIndicatorColor()
+android.support.v4.view.PagerTabStrip: void setTextSpacing(int)
+android.support.v4.view.PagerTabStrip: void setBackgroundDrawable(android.graphics.drawable.Drawable)
+android.support.v4.view.PagerTabStrip: void setBackgroundColor(int)
+android.support.v4.view.PagerTabStrip: void setBackgroundResource(int)
+android.support.v4.view.PagerTabStrip: void setDrawFullUnderline(boolean)
+android.support.v4.view.PagerTabStrip: boolean getDrawFullUnderline()
+android.support.v4.view.PagerTabStrip: int getMinHeight()
+android.support.v4.view.PagerTitleStrip: void setSingleLineAllCaps(android.widget.TextView)
+android.support.v4.view.PagerTitleStrip: void setTextSpacing(int)
+android.support.v4.view.PagerTitleStrip: int getTextSpacing()
+android.support.v4.view.PagerTitleStrip: void setNonPrimaryAlpha(float)
+android.support.v4.view.PagerTitleStrip: void setTextColor(int)
+android.support.v4.view.PagerTitleStrip: void setGravity(int)
+android.support.v4.view.PagerTitleStrip: int getMinHeight()
+android.support.v4.view.ViewPager: void setScrollState(int)
+android.support.v4.view.ViewPager: void setAdapter(android.support.v4.view.PagerAdapter)
+android.support.v4.view.ViewPager: android.support.v4.view.PagerAdapter getAdapter()
+android.support.v4.view.ViewPager: void setOnAdapterChangeListener(android.support.v4.view.ViewPager$OnAdapterChangeListener)
+android.support.v4.view.ViewPager: int getClientWidth()
+android.support.v4.view.ViewPager: void setCurrentItem(int)
+android.support.v4.view.ViewPager: int getCurrentItem()
+android.support.v4.view.ViewPager: void setOnPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener)
+android.support.v4.view.ViewPager: void setChildrenDrawingOrderEnabledCompat(boolean)
+android.support.v4.view.ViewPager: int getOffscreenPageLimit()
+android.support.v4.view.ViewPager: void setOffscreenPageLimit(int)
+android.support.v4.view.ViewPager: void setPageMargin(int)
+android.support.v4.view.ViewPager: int getPageMargin()
+android.support.v4.view.ViewPager: void setPageMarginDrawable(android.graphics.drawable.Drawable)
+android.support.v4.view.ViewPager: void setPageMarginDrawable(int)
+android.support.v4.view.ViewPager: void setScrollingCacheEnabled(boolean)
+android.support.v4.view.ViewPager$SavedState
+android.support.v4.view.ViewPager$SavedState: android.os.Parcelable$Creator CREATOR
+android.support.v4.widget.DrawerLayout: void setScrimColor(int)
+android.support.v4.widget.DrawerLayout: void setDrawerListener(android.support.v4.widget.DrawerLayout$DrawerListener)
+android.support.v4.widget.DrawerLayout: void setDrawerLockMode(int)
+android.support.v4.widget.DrawerLayout$SavedState
+android.support.v4.widget.DrawerLayout$SavedState: android.os.Parcelable$Creator CREATOR
+android.support.v4.widget.SlidingPaneLayout: void setParallaxDistance(int)
+android.support.v4.widget.SlidingPaneLayout: int getParallaxDistance()
+android.support.v4.widget.SlidingPaneLayout: void setSliderFadeColor(int)
+android.support.v4.widget.SlidingPaneLayout: int getSliderFadeColor()
+android.support.v4.widget.SlidingPaneLayout: void setCoveredFadeColor(int)
+android.support.v4.widget.SlidingPaneLayout: int getCoveredFadeColor()
+android.support.v4.widget.SlidingPaneLayout: void setPanelSlideListener(android.support.v4.widget.SlidingPaneLayout$PanelSlideListener)
+android.support.v4.widget.SlidingPaneLayout: void setShadowDrawable(android.graphics.drawable.Drawable)
+android.support.v4.widget.SlidingPaneLayout: void setShadowResource(int)
+android.support.v4.widget.SlidingPaneLayout$SavedState
+android.support.v4.widget.SlidingPaneLayout$SavedState: android.os.Parcelable$Creator CREATOR
+com.googlecode.leptonica.android.AdaptiveMap
+com.googlecode.leptonica.android.AdaptiveMap: int nativeBackgroundNormMorph(int,int,int,int)
+com.googlecode.leptonica.android.Binarize
+com.googlecode.leptonica.android.Binarize: int nativeOtsuAdaptiveThreshold(int,int,int,int,int,float)
+com.googlecode.leptonica.android.Binarize: int nativeSauvolaBinarizeTiled(int,int,float,int,int)
+com.googlecode.leptonica.android.Box
+com.googlecode.leptonica.android.Box: int nativeCreate(int,int,int,int)
+com.googlecode.leptonica.android.Box: int nativeGetX(int)
+com.googlecode.leptonica.android.Box: int nativeGetY(int)
+com.googlecode.leptonica.android.Box: int nativeGetWidth(int)
+com.googlecode.leptonica.android.Box: int nativeGetHeight(int)
+com.googlecode.leptonica.android.Box: void nativeDestroy(int)
+com.googlecode.leptonica.android.Box: boolean nativeGetGeometry(int,int[])
+com.googlecode.leptonica.android.Convert
+com.googlecode.leptonica.android.Convert: int nativeConvertTo8(int)
+com.googlecode.leptonica.android.Enhance
+com.googlecode.leptonica.android.Enhance: int nativeUnsharpMasking(int,int,float)
+com.googlecode.leptonica.android.JpegIO
+com.googlecode.leptonica.android.JpegIO: byte[] nativeCompressToJpeg(int,int,boolean)
+com.googlecode.leptonica.android.Pix
+com.googlecode.leptonica.android.Pix: int nativeCreatePix(int,int,int)
+com.googlecode.leptonica.android.Pix: int nativeCreateFromData(byte[],int,int,int)
+com.googlecode.leptonica.android.Pix: boolean nativeGetData(int,byte[])
+com.googlecode.leptonica.android.Pix: int nativeGetDataSize(int)
+com.googlecode.leptonica.android.Pix: int nativeClone(int)
+com.googlecode.leptonica.android.Pix: int nativeCopy(int)
+com.googlecode.leptonica.android.Pix: boolean nativeInvert(int)
+com.googlecode.leptonica.android.Pix: void nativeDestroy(int)
+com.googlecode.leptonica.android.Pix: boolean nativeGetDimensions(int,int[])
+com.googlecode.leptonica.android.Pix: int nativeGetWidth(int)
+com.googlecode.leptonica.android.Pix: int nativeGetHeight(int)
+com.googlecode.leptonica.android.Pix: int nativeGetDepth(int)
+com.googlecode.leptonica.android.Pix: int nativeGetPixel(int,int,int)
+com.googlecode.leptonica.android.Pix: void nativeSetPixel(int,int,int,int)
+com.googlecode.leptonica.android.Pixa
+com.googlecode.leptonica.android.Pixa: int nativeCreate(int)
+com.googlecode.leptonica.android.Pixa: int nativeCopy(int)
+com.googlecode.leptonica.android.Pixa: int nativeSort(int,int,int)
+com.googlecode.leptonica.android.Pixa: boolean nativeJoin(int,int)
+com.googlecode.leptonica.android.Pixa: int nativeGetCount(int)
+com.googlecode.leptonica.android.Pixa: void nativeDestroy(int)
+com.googlecode.leptonica.android.Pixa: void nativeAddPix(int,int,int)
+com.googlecode.leptonica.android.Pixa: void nativeAddBox(int,int,int)
+com.googlecode.leptonica.android.Pixa: void nativeAdd(int,int,int,int)
+com.googlecode.leptonica.android.Pixa: boolean nativeWriteToFileRandomCmap(int,java.lang.String,int,int)
+com.googlecode.leptonica.android.Pixa: void nativeReplacePix(int,int,int,int)
+com.googlecode.leptonica.android.Pixa: void nativeMergeAndReplacePix(int,int,int)
+com.googlecode.leptonica.android.Pixa: int nativeGetBox(int,int)
+com.googlecode.leptonica.android.Pixa: int nativeGetPix(int,int)
+com.googlecode.leptonica.android.Pixa: boolean nativeGetBoxGeometry(int,int,int[])
+com.googlecode.leptonica.android.ReadFile
+com.googlecode.leptonica.android.ReadFile: int nativeReadMem(byte[],int)
+com.googlecode.leptonica.android.ReadFile: int nativeReadBytes8(byte[],int,int)
+com.googlecode.leptonica.android.ReadFile: boolean nativeReplaceBytes8(int,byte[],int,int)
+com.googlecode.leptonica.android.ReadFile: int nativeReadFiles(java.lang.String,java.lang.String)
+com.googlecode.leptonica.android.ReadFile: int nativeReadFile(java.lang.String)
+com.googlecode.leptonica.android.ReadFile: int nativeReadBitmap(android.graphics.Bitmap)
+com.googlecode.leptonica.android.Rotate
+com.googlecode.leptonica.android.Rotate: int nativeRotate(int,float,boolean,boolean)
+com.googlecode.leptonica.android.Scale
+com.googlecode.leptonica.android.Scale: int nativeScale(int,float,float)
+com.googlecode.leptonica.android.Scale$ScaleType: com.googlecode.leptonica.android.Scale$ScaleType[] values()
+com.googlecode.leptonica.android.Scale$ScaleType: com.googlecode.leptonica.android.Scale$ScaleType valueOf(java.lang.String)
+com.googlecode.leptonica.android.Skew
+com.googlecode.leptonica.android.Skew: float nativeFindSkew(int,float,float,int,int,float)
+com.googlecode.leptonica.android.WriteFile
+com.googlecode.leptonica.android.WriteFile: int nativeWriteBytes8(int,byte[])
+com.googlecode.leptonica.android.WriteFile: boolean nativeWriteFiles(int,java.lang.String,int)
+com.googlecode.leptonica.android.WriteFile: byte[] nativeWriteMem(int,int)
+com.googlecode.leptonica.android.WriteFile: boolean nativeWriteImpliedFormat(int,java.lang.String,int,boolean)
+com.googlecode.leptonica.android.WriteFile: boolean nativeWriteBitmap(int,android.graphics.Bitmap)
+com.googlecode.tesseract.android.PageIterator
+com.googlecode.tesseract.android.PageIterator: void nativeBegin(int)
+com.googlecode.tesseract.android.PageIterator: boolean nativeNext(int,int)
+com.googlecode.tesseract.android.ResultIterator
+com.googlecode.tesseract.android.ResultIterator: java.lang.String nativeGetUTF8Text(int,int)
+com.googlecode.tesseract.android.ResultIterator: float nativeConfidence(int,int)
+com.googlecode.tesseract.android.TessBaseAPI
+com.googlecode.tesseract.android.TessBaseAPI: void nativeClassInit()
+com.googlecode.tesseract.android.TessBaseAPI: void nativeConstruct()
+com.googlecode.tesseract.android.TessBaseAPI: void nativeFinalize()
+com.googlecode.tesseract.android.TessBaseAPI: boolean nativeInit(java.lang.String,java.lang.String)
+com.googlecode.tesseract.android.TessBaseAPI: boolean nativeInitOem(java.lang.String,java.lang.String,int)
+com.googlecode.tesseract.android.TessBaseAPI: java.lang.String nativeGetInitLanguagesAsString()
+com.googlecode.tesseract.android.TessBaseAPI: void nativeClear()
+com.googlecode.tesseract.android.TessBaseAPI: void nativeEnd()
+com.googlecode.tesseract.android.TessBaseAPI: void nativeSetImageBytes(byte[],int,int,int,int)
+com.googlecode.tesseract.android.TessBaseAPI: void nativeSetImagePix(int)
+com.googlecode.tesseract.android.TessBaseAPI: void nativeSetRectangle(int,int,int,int)
+com.googlecode.tesseract.android.TessBaseAPI: java.lang.String nativeGetUTF8Text()
+com.googlecode.tesseract.android.TessBaseAPI: int nativeMeanConfidence()
+com.googlecode.tesseract.android.TessBaseAPI: int[] nativeWordConfidences()
+com.googlecode.tesseract.android.TessBaseAPI: boolean nativeSetVariable(java.lang.String,java.lang.String)
+com.googlecode.tesseract.android.TessBaseAPI: void nativeSetDebug(boolean)
+com.googlecode.tesseract.android.TessBaseAPI: void nativeSetPageSegMode(int)
+com.googlecode.tesseract.android.TessBaseAPI: int nativeGetRegions()
+com.googlecode.tesseract.android.TessBaseAPI: int nativeGetTextlines()
+com.googlecode.tesseract.android.TessBaseAPI: int nativeGetStrips()
+com.googlecode.tesseract.android.TessBaseAPI: int nativeGetWords()
+com.googlecode.tesseract.android.TessBaseAPI: int nativeGetCharacters()
+com.googlecode.tesseract.android.TessBaseAPI: int nativeGetResultIterator()
+org.cgiar.ilri.lab.MainActivity
+org.cgiar.ilri.lab.MainActivity: MainActivity()
+org.cgiar.ilri.lab.MainActivity: void onClick(android.view.View)
+org.cgiar.ilri.lab.R$dimen: int activity_horizontal_margin
+org.cgiar.ilri.lab.R$dimen: int activity_vertical_margin
+org.cgiar.ilri.lab.R$drawable: int focus_area
+org.cgiar.ilri.lab.R$drawable: int ic_launcher
+org.cgiar.ilri.lab.R$drawable: int slide
+org.cgiar.ilri.lab.R$id: int action_settings
+org.cgiar.ilri.lab.R$id: int focus_area_img
+org.cgiar.ilri.lab.R$id: int last_image
+org.cgiar.ilri.lab.R$id: int left_limit
+org.cgiar.ilri.lab.R$id: int limit_slide_img
+org.cgiar.ilri.lab.R$id: int lower_limit
+org.cgiar.ilri.lab.R$id: int main_layout
+org.cgiar.ilri.lab.R$id: int preview
+org.cgiar.ilri.lab.R$id: int right_limit
+org.cgiar.ilri.lab.R$id: int upper_limit
+org.cgiar.ilri.lab.R$layout: int activity_main
+org.cgiar.ilri.lab.R$menu: int main
+org.cgiar.ilri.lab.R$string: int action_settings
+org.cgiar.ilri.lab.R$string: int app_name
+org.cgiar.ilri.lab.R$string: int app_short_name
+org.cgiar.ilri.lab.R$string: int hello_world
+org.cgiar.ilri.lab.R$style: int AppBaseTheme
+org.cgiar.ilri.lab.R$style: int AppTheme
+org.cgiar.ilri.lab.SenderService
+org.cgiar.ilri.lab.SenderService: SenderService()

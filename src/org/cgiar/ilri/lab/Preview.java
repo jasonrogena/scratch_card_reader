@@ -12,6 +12,7 @@ import java.util.List;
 import com.googlecode.tesseract.android.TessBaseAPI;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,6 +32,7 @@ import android.hardware.Camera.ShutterCallback;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -54,8 +56,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private ShutterCallback shutterCallback;
 	private PictureCallback rawCallback;
 	private PictureCallback jpegCallback;
-	private double activeImageHeight=0.1;//ration of active height on a total image height
-	private double activeImageWidth=0.8;
+	private double activeImageHeight = 0.1;//ration of active height on a total image height
+	private double activeImageWidth = 0.8;
 	private int previewHeight = -1;
 	private int previewWidth = -1;
 	private boolean idle=true;
@@ -71,6 +73,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private CountDownTimer countDownTimer;
 	private ImageView lastImageIV;
 	private AmbientLightManager ambientLightManager;
+	private PreferenceHandler preferenceHandler;
 
 	Preview(Context context, RelativeLayout mainLayout, FrameLayout previewFrameLayout, View upperLimit, View lowerLimit, View leftLimit, View rightLimit, ImageView lastImageIV) 
 	{
@@ -78,6 +81,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 
 		// Install a SurfaceHolder.Callback so we get notified when the
 		// underlying surface is created and destroyed.
+		preferenceHandler = new PreferenceHandler(context);
+		loadActiveImageSize(true);
+		
 		this.mainLayout=mainLayout;
 		this.upperLimit=upperLimit;
 		this.upperLimit.setOnLongClickListener(this);
@@ -94,6 +100,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		mHolder = getHolder();
 		mHolder.addCallback(this);
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		
+		//get active camera width and height from shared preferences
 		
 		ambientLightManager =new AmbientLightManager(context);
 		
@@ -346,6 +354,39 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		rightLimit.setLayoutParams(rightLimitLP);
 	}
 	
+	private void loadActiveImageSize(boolean setIfNotSet){
+		if(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT)!=null){
+			this.activeImageHeight=Double.parseDouble(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT));
+		}
+		if(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH)!=null){
+			this.activeImageWidth=Double.parseDouble(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH));
+		}
+		if(setIfNotSet){
+			if(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT)==null || preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH)==null){
+				saveActiveImageSize();
+			}
+		}
+	}
+	
+	private void saveActiveImageSize(){
+		if(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT)==null){
+			preferenceHandler.setPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT, String.valueOf(this.activeImageHeight));
+		}
+		else{
+			double savedAIH = Double.parseDouble(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT));
+			double averageAIH = (savedAIH + this.activeImageHeight)/2;
+			preferenceHandler.setPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT, String.valueOf(averageAIH));
+		}
+		if(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH)==null){
+			preferenceHandler.setPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH, String.valueOf(this.activeImageWidth));
+		}
+		else{
+			double savedAIW = Double.parseDouble(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH));
+			double averageAIW = (savedAIW+this.activeImageWidth)/2;
+			preferenceHandler.setPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH, String.valueOf(averageAIW));
+		}
+	}
+	
 	public void autoFocus()
 	{
 		if(camera!=null)
@@ -364,9 +405,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 			Parameters parameters = camera.getParameters();
 			if(toOn){
 				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+				parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_FLUORESCENT);
 			}
 			else{
 				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+				parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
 			}
 			camera.setParameters(parameters);
 		}
@@ -505,6 +548,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				Log.d("CAMERA", "operator = "+operatorName);
 				if(result.length()>12 && operatorName.trim().equals("Safaricom") && result.length() < 20) {
 					lastImageIV.setVisibility(ImageView.GONE);
+					saveActiveImageSize();
 					//Toast.makeText(Preview.this.getContext(), "on Safaricom "+result, Toast.LENGTH_LONG).show();
 					Intent intent=new Intent(Intent.ACTION_DIAL);
 					intent.setData(Uri.fromParts("tel", "*141*"+result+"#", "#"));
