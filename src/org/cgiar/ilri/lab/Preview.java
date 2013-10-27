@@ -44,7 +44,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
+/**
+ * @author Jason Rogena
+ * 
+ * As of now, this is the brain of the project. Tesseract recognition done here, Autofocus management also done here
+ *
+ */
 class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLongClickListener, View.OnTouchListener
 {
 	private static final String TAG = "Preview";
@@ -56,8 +61,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private ShutterCallback shutterCallback;
 	private PictureCallback rawCallback;
 	private PictureCallback jpegCallback;
-	private double activeImageHeight = 0.1;//ration of active height on a total image height
-	private double activeImageWidth = 0.8;
+	private double activeImageHeight = 0.1;//ration of active height to total image height
+	private double activeImageWidth = 0.8;//ration of active width to total image width
 	private int previewHeight = -1;
 	private int previewWidth = -1;
 	private boolean idle=true;
@@ -170,6 +175,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		};
 	}
 
+	/**
+	 * This method should be as clean as possible. It can be the source of very many random app crashes
+	 */
 	public void surfaceCreated(SurfaceHolder holder) 
 	{
 		// The Surface has been created, acquire the camera and tell it where
@@ -193,6 +201,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		}
 	}
 
+	/**
+	 * This method should be as clean as possible.
+	 *  - ensure the camera resource is released gracefully
+	 *  - ensure the instance of the camera variable is released by making it null
+	 * If this is not done a lot of app crashing will occure
+	 */
 	public void surfaceDestroyed(SurfaceHolder holder) 
 	{
 		// Surface will be destroyed when we return, so stop the preview.
@@ -206,18 +220,30 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		camera=null;
 	}
 	
+	/**
+	 * This method is called when the app is pause.
+	 * Ensure you stop the camera from taking previews otherwise the app will continue consuming battery when in the paused state
+	 */
 	public void pause() {
 		if(camera!=null){
 			camera.stopPreview();
 		}
 	}
 	
+	/**
+	 * Called when the app is unpaused
+	 * resume anything you paused in pause()
+	 */
 	public void resume(){
 		if(camera!=null){
 			camera.startPreview();
 		}
 	}
 
+	
+	/**
+	 * Setting of camera parameters done here (Including setting the preview and picture sizes)
+	 */
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		// Now that the size is known, set up the camera parameters and begin
 		// the preview.
@@ -310,6 +336,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		resetXLimits();
 	}
 	
+	/**
+	 * This method resets the height of the active image area using the activeImageHeight
+	 */
 	private void resetYLimits() {
 		if(activeImageHeight < 0) activeImageHeight = 0;
 		else if(activeImageHeight > 0.8) activeImageHeight = 0.8;
@@ -331,6 +360,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		rightLimit.setLayoutParams(rightLimitLP);
 	}
 	
+	/**
+	 * This method resets the width of the active image area using the activeImageWidth
+	 */
 	private void resetXLimits(){
 		if(activeImageWidth < 0) activeImageWidth = 0;
 		else if(activeImageWidth > 0.9) activeImageWidth = 0.9;
@@ -345,6 +377,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		rightLimit.setLayoutParams(rightLimitLP);
 	}
 	
+	/**
+	 * This method retrieves the activeImageHeight and activeImageWidth ratios saved in shared preferences
+	 * 
+	 * @param setIfNotSet - if set to true, the activeImageHeight and activeImageWidth ratios will be saved in shared preferences if there is no saved copy of the ratios in shared preferences
+	 */
 	private void loadActiveImageSize(boolean setIfNotSet){
 		if(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT)!=null){
 			this.activeImageHeight=Double.parseDouble(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT));
@@ -359,6 +396,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		}
 	}
 	
+	/**
+	 * This method saves the activeImageHeight and activeImageWidth ratios in shared preferences
+	 */
 	private void saveActiveImageSize(){
 		if(preferenceHandler.getPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT)==null){
 			preferenceHandler.setPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_HEIGHT, String.valueOf(this.activeImageHeight));
@@ -378,11 +418,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		}
 	}
 	
+	/**
+	 * This method initializes camera autofocus
+	 */
 	public void autoFocus()
 	{
 		if(camera!=null)
 		{
-			double yCompensation = (previewFrameLayout.getHeight() - previewHeight) / previewFrameLayout.getHeight();
+			//COMMENTED CODE REQUIRES API LEVEL 14
+			/*double yCompensation = (previewFrameLayout.getHeight() - previewHeight) / previewFrameLayout.getHeight();
 			double activeImageHeight = Preview.this.activeImageHeight - yCompensation;
 			
 			double xCompensation = (previewFrameLayout.getWidth() - previewWidth) / previewFrameLayout.getWidth();
@@ -391,7 +435,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 			int halfWidth = (int) ((2000 * activeImageWidth)/2);
 			int halfHeight = (int) ((2000 * activeImageHeight)/2);
 			
-			/*Parameters parameters = camera.getParameters();
+			Parameters parameters = camera.getParameters();
 			Area centralFocusArea = new Area(new Rect(-1*halfHeight, -1*halfWidth, halfHeight, 1000), halfWidth);
 			//Area centralFocusArea = new Area(new Rect(-1000, -3, 1000, 3), 1000);
 			List<Area> focusAreas = new ArrayList<Camera.Area>();
@@ -412,6 +456,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		return heightOfCamera;
 	}
 	
+	/**
+	 * This method turns the camera flashlight either on or off. Camera whitbalance is also reset
+	 * 
+	 * @param toOn - if true, flashlights is set to on
+	 */
 	public void setTorch(boolean toOn){
 		if(camera!=null){
 			Parameters parameters = camera.getParameters();
@@ -436,6 +485,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				canvas.getHeight() / 2, p);
 	}
 	
+	/**
+	 * This async thread does everything related to Tesseract recognition
+	 * 
+	 * @author jason
+	 *
+	 */
 	private class OCRHandler extends AsyncTask<byte[], Integer, String>
 	{
 		private Bitmap lastCapture;
@@ -622,6 +677,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		return false;
 	}
 
+	
+	/**
+	 * This method changes the values of activeImageHeight and activeImageWidth using the x and y coords of a touch
+	 */
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if(event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_UP) {

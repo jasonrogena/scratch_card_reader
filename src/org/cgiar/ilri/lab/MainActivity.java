@@ -34,6 +34,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+/**
+ * This is the main activity (duh). Check Preview.java since that is where all the cool stuff is done. But do remember that everything starts here
+ * 
+ * "I'm trying to free your mind, Neo, but I can only show you the door. You're the one that has to walk through it."
+ * 
+ * @author Jason Rogena
+ *
+ */
 public class MainActivity extends Activity implements OnClickListener
 {
 	public static final String DATA_PATH = Environment.getExternalStorageDirectory()+File.separator+"SCR"+File.separator;
