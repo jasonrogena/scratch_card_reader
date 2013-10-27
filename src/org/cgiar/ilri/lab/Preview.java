@@ -299,15 +299,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
 		parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
 		
-		Area centralFocusArea = new Area(new Rect(-10, -1000, 10, 1000), 1000);
-		//Area centralFocusArea = new Area(new Rect(-1000, -3, 1000, 3), 1000);
-		List<Area> focusAreas = new ArrayList<Camera.Area>();
-		List<Area> meteringAreas = new ArrayList<Camera.Area>();
-		focusAreas.add(centralFocusArea);
-		meteringAreas.add(centralFocusArea);
-		
-		parameters.setFocusAreas(focusAreas);
-		parameters.setMeteringAreas(meteringAreas);
 		Log.d("CAMERA", "layoutSize :"+String.valueOf(previewFrameLayout.getHeight())+" x "+String.valueOf(previewFrameLayout.getWidth()));
 		Log.d("CAMERA", "preview size :"+String.valueOf(previewWidth)+" x "+String.valueOf(previewHeight));
 		Log.d("CAMERA", "picture size :"+String.valueOf(pictureWidth)+" x "+String.valueOf(pictureHeight));
@@ -391,6 +382,27 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	{
 		if(camera!=null)
 		{
+			double yCompensation = (previewFrameLayout.getHeight() - previewHeight) / previewFrameLayout.getHeight();
+			double activeImageHeight = Preview.this.activeImageHeight - yCompensation;
+			
+			double xCompensation = (previewFrameLayout.getWidth() - previewWidth) / previewFrameLayout.getWidth();
+			double activeImageWidth = Preview.this.activeImageWidth - xCompensation;
+			
+			int halfWidth = (int) ((2000 * activeImageWidth)/2);
+			int halfHeight = (int) ((2000 * activeImageHeight)/2);
+			
+			/*Parameters parameters = camera.getParameters();
+			Area centralFocusArea = new Area(new Rect(-1*halfHeight, -1*halfWidth, halfHeight, 1000), halfWidth);
+			//Area centralFocusArea = new Area(new Rect(-1000, -3, 1000, 3), 1000);
+			List<Area> focusAreas = new ArrayList<Camera.Area>();
+			List<Area> meteringAreas = new ArrayList<Camera.Area>();
+			focusAreas.add(centralFocusArea);
+			meteringAreas.add(centralFocusArea);
+			
+			parameters.setFocusAreas(focusAreas);
+			parameters.setMeteringAreas(meteringAreas);
+			camera.setParameters(parameters);*/
+			
 			camera.autoFocus(autoFocusCallback);
 		}
 	}
