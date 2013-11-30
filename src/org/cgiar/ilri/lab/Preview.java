@@ -79,16 +79,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private ImageView lastImageIV;
 	private AmbientLightManager ambientLightManager;
 	private PreferenceHandler preferenceHandler;
+	private MainActivity mainActivity;
 
-	Preview(Context context, RelativeLayout mainLayout, FrameLayout previewFrameLayout, View upperLimit, View lowerLimit, View leftLimit, View rightLimit, ImageView lastImageIV) 
+	Preview(MainActivity mainActivity, RelativeLayout mainLayout, FrameLayout previewFrameLayout, View upperLimit, View lowerLimit, View leftLimit, View rightLimit, ImageView lastImageIV) 
 	{
-		super(context);
+		super(mainActivity);
 
 		// Install a SurfaceHolder.Callback so we get notified when the
 		// underlying surface is created and destroyed.
-		preferenceHandler = new PreferenceHandler(context);
+		preferenceHandler = new PreferenceHandler(mainActivity);
 		loadActiveImageSize(true);
 		
+		this.mainActivity = mainActivity;
 		this.mainLayout=mainLayout;
 		this.upperLimit=upperLimit;
 		this.upperLimit.setOnLongClickListener(this);
@@ -108,7 +110,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		
 		//get active camera width and height from shared preferences
 		
-		ambientLightManager =new AmbientLightManager(context);
+		ambientLightManager =new AmbientLightManager(mainActivity);
 		
 		shutterCallback=new ShutterCallback()
         {
@@ -197,7 +199,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 			});
 			ambientLightManager.startMonitoring(this);
 		} catch (IOException e) {
+			Toast.makeText(this.getContext(), "Bummer, the app was unable to gain access exclusive access to the camera", Toast.LENGTH_LONG).show();
 			e.printStackTrace();
+			mainActivity.finish();
+		}
+		catch (RuntimeException e) {
+			Toast.makeText(this.getContext(), "WTF, that's embarrassing. The app will be unable to proceed normally beyond this point. I'm working on that", Toast.LENGTH_LONG).show();
+			e.printStackTrace();
+			mainActivity.finish();
 		}
 	}
 
@@ -329,11 +338,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		Log.d("CAMERA", "preview size :"+String.valueOf(previewWidth)+" x "+String.valueOf(previewHeight));
 		Log.d("CAMERA", "picture size :"+String.valueOf(pictureWidth)+" x "+String.valueOf(pictureHeight));
 		heightOfCamera=previewWidth;
-		camera.setParameters(parameters);
-		camera.setDisplayOrientation(90);
-		camera.startPreview();
-		resetYLimits();
-		resetXLimits();
+		try{
+			camera.setParameters(parameters);
+			camera.setDisplayOrientation(90);
+			camera.startPreview();
+			resetYLimits();
+			resetXLimits();
+		}
+		catch(RuntimeException e){
+			Toast.makeText(this.getContext(), "Bummer! Your phone appears to be incompatible with this app. But not for long", Toast.LENGTH_LONG).show();
+			e.printStackTrace();
+			mainActivity.finish();
+		}
 	}
 	
 	/**
@@ -446,8 +462,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 			parameters.setFocusAreas(focusAreas);
 			parameters.setMeteringAreas(meteringAreas);
 			camera.setParameters(parameters);*/
-			
-			camera.autoFocus(autoFocusCallback);
+			try{
+				camera.autoFocus(autoFocusCallback);
+			}
+			catch(RuntimeException e){
+				Toast.makeText(this.getContext(), "WOW, go slow on the clicking there Tiger",Toast.LENGTH_LONG).show();
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -521,7 +542,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				double activeImageWidth = Preview.this.activeImageWidth - xCompensation;
 				
 				Log.d("CAMERA", "byte size = "+String.valueOf(data[0].length));
-				Bitmap bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length);
+				BitmapFactory.Options bitMapOptions = new BitmapFactory.Options();
+				bitMapOptions.inPurgeable = true; //helps avoid OutOfMemoryErrors
+				Bitmap bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length, bitMapOptions);
 				Matrix matrix=new Matrix();
 				matrix.postRotate(90);
 				Bitmap rotatedImage=Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
