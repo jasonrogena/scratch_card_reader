@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.googlecode.tesseract.android.TessBaseAPI;
+
+import android.R.integer;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -64,7 +66,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 	private double activeImageHeight = 0.1;//ration of active height to total image height
 	private double activeImageWidth = 0.8;//ration of active width to total image width
 	private int previewHeight = -1;
+	private int pictureHeight = -1;
 	private int previewWidth = -1;
+	private int pictureWidth = -1;
 	private boolean idle=true;
 	private RelativeLayout mainLayout;
 	private View upperLimit;
@@ -89,6 +93,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		// underlying surface is created and destroyed.
 		preferenceHandler = new PreferenceHandler(mainActivity);
 		loadActiveImageSize(true);
+		
+		String appCrushed = preferenceHandler.getPreference(PreferenceHandler.KEY_APP_CRASHED);
+		if(appCrushed!=null && appCrushed.equals(PreferenceHandler.VALUE_TRUE)){
+			Toast.makeText(mainActivity, "App appeared to have crashed the last time :(.. Fixing myself!", Toast.LENGTH_LONG).show();
+			int bestPreviewRatio = Integer.parseInt(preferenceHandler.getPreference(PreferenceHandler.KEY_BEST_PREVIEW_RATIO));
+			if(bestPreviewRatio > 1) bestPreviewRatio--;
+			Log.d("CAMERA", "Resetting bestPreviewRatio to "+bestPreviewRatio);
+			preferenceHandler.setPreference(PreferenceHandler.KEY_AVOID_INCREASING_BPR, PreferenceHandler.VALUE_TRUE);
+			preferenceHandler.setPreference(PreferenceHandler.KEY_BEST_PREVIEW_RATIO, String.valueOf(bestPreviewRatio));
+		}
 		
 		this.mainActivity = mainActivity;
 		this.mainLayout=mainLayout;
@@ -140,11 +154,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				{
 					if(idle)
 					{
-						Log.d("CAMERA", "thread not idle");
+						Log.d("CAMERA", "OCR thread was idle");
 						idle=false;
 						OCRHandler handler=new OCRHandler();
 						handler.execute(data);
 					}
+					else
+						Log.d("CAMERA", "OCR thread is not idle");
 					camera.startPreview();
 					
 				} catch (Exception e) 
@@ -325,7 +341,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		}
 		
 		this.previewHeight = previewWidth;
+		this.pictureHeight = pictureWidth;
 		this.previewWidth = previewHeight;
+		this.pictureWidth = pictureHeight;
 		Log.d("CAMERA", "Focal length : "+String.valueOf(parameters.getFocalLength()));
 		parameters.setPreviewSize(previewWidth, previewHeight);
 		parameters.setPictureSize(pictureWidth, pictureHeight);
@@ -432,6 +450,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 			double averageAIW = (savedAIW+this.activeImageWidth)/2;
 			preferenceHandler.setPreference(PreferenceHandler.KEY_ACTIVE_CAMERA_WIDTH, String.valueOf(averageAIW));
 		}
+		preferenceHandler.setPreference(PreferenceHandler.KEY_BEST_PREVIEW_RATIO, "1");
+		preferenceHandler.setPreference(PreferenceHandler.KEY_AVOID_INCREASING_BPR, PreferenceHandler.VALUE_FALSE);
 	}
 	
 	/**
@@ -519,6 +539,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		protected void onPreExecute() 
 		{
 			super.onPreExecute();
+			preferenceHandler.setPreference(PreferenceHandler.KEY_APP_CRASHED, PreferenceHandler.VALUE_TRUE);
 			Toast.makeText(Preview.this.getContext(), "starting..", Toast.LENGTH_SHORT).show();
 		}
 
@@ -542,9 +563,19 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 				double activeImageWidth = Preview.this.activeImageWidth - xCompensation;
 				
 				Log.d("CAMERA", "byte size = "+String.valueOf(data[0].length));
+				// First decode with inJustDecodeBounds=true to check dimensions
 				BitmapFactory.Options bitMapOptions = new BitmapFactory.Options();
-				bitMapOptions.inPurgeable = true; //helps avoid OutOfMemoryErrors
+				bitMapOptions.inJustDecodeBounds = true;
+				//bitMapOptions.inPurgeable = true; //helps avoid OutOfMemoryErrors
+				//consider using bitMapOptions.inJustDecodeBounds = true 
 				Bitmap bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length, bitMapOptions);
+				
+				// Calculate inSampleSize
+				bitMapOptions.inSampleSize = calculateInSampleSize(bitMapOptions, previewHeight, previewWidth);
+				bitMapOptions.inJustDecodeBounds = false;
+				
+				//load a scaled down version of the bitmap
+				bitmap=BitmapFactory.decodeByteArray(data[0], 0, data[0].length, bitMapOptions);
 				Matrix matrix=new Matrix();
 				matrix.postRotate(90);
 				Bitmap rotatedImage=Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
@@ -630,12 +661,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		protected void onPostExecute(String result)
 		{
 			super.onPostExecute(result);
+			preferenceHandler.setPreference(PreferenceHandler.KEY_APP_CRASHED, PreferenceHandler.VALUE_FALSE);
 			if(result!=null)
 			{
 				Log.d("CAMERA", result);
 				TelephonyManager telephonyManager=((TelephonyManager)Preview.this.getContext().getSystemService(Context.TELEPHONY_SERVICE));
 				String operatorName=telephonyManager.getNetworkOperatorName();
 				Log.d("CAMERA", "operator = "+operatorName);
+				showLastCapture(lastCapture, operatorName, result);
+				
 				if(result.length()>12 && operatorName.trim().equals("Safaricom") && result.length() < 20) {
 					lastImageIV.setVisibility(ImageView.GONE);
 					saveActiveImageSize();
@@ -645,29 +679,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 					Preview.this.getContext().startActivity(intent);
 				}
 				else if(operatorName.trim().equals("Safaricom")) {
-					//Show captured image
-					if(countDownTimer == null) {
-						countDownTimer = new CountDownTimer(750,750) {
-							
-							@Override
-							public void onTick(long millisUntilFinished) {
-								// TODO Auto-generated method stub
-								
-							}
-							
-							@Override
-							public void onFinish() {
-								lastImageIV.setVisibility(ImageView.GONE);
-							}
-						};
-					}
-					lastImageIV.setImageBitmap(lastCapture);
-					lastImageIV.setVisibility(ImageView.VISIBLE);
-					countDownTimer.start();
-					
-					//save image
-					SampleSaver sampleSaver = new SampleSaver(operatorName.trim(), result.length());
-					sampleSaver.execute(lastCapture);
+					increaseImageQuality();
 					
 					if(result.length()<=12) {
 						if(activeImageHeight < 0.05) {
@@ -770,6 +782,36 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		return true;
 	}
 	
+	/**
+	 * This calculates a sample size value that is a power of two based on a target width and height
+	 * 
+	 * @param options		BitmapFactory.Options for the bitmap
+	 * @param reqWidth		The width you want the bitmap to scale down to
+	 * @param reqHeight		The height you want the bitmap to scale down to
+	 * 
+	 * @return				The appropriate inSampleSize
+	 */
+	private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight){
+		reqWidth = reqWidth * Integer.parseInt(preferenceHandler.getPreference(PreferenceHandler.KEY_BEST_PREVIEW_RATIO));
+		reqHeight = reqHeight * Integer.parseInt(preferenceHandler.getPreference(PreferenceHandler.KEY_BEST_PREVIEW_RATIO));
+		int inSampleSize = 1;
+		final int height = options.outHeight;
+		final int width = options.outWidth;
+		
+		Log.d("CAMERA", "*** required height = "+String.valueOf(reqHeight)+" and actual height = "+String.valueOf(height));
+		Log.d("CAMERA", "*** required width = "+String.valueOf(reqWidth)+" and actual width = "+String.valueOf(width));
+		
+		if(height > reqHeight || width > reqWidth){
+			final int halfHeight = height / 2;
+			final int halfWidht = width / 2;
+			while((halfHeight / inSampleSize) > reqHeight && (halfWidht / inSampleSize) >reqWidth){
+				inSampleSize *= 2;
+			}
+		}
+		Log.d("CAMERA", "*** inSampleSize = "+String.valueOf(inSampleSize));
+		return inSampleSize;
+	}
+	
 	private class SizeChecker {
 		private double ratioDiff;
 		private int index;
@@ -789,5 +831,48 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, View.OnLong
 		public int getSize() {
 			return size;
 		}
+	}
+	
+	private void increaseImageQuality(){
+		int bestPreviewRatio = Integer.parseInt(preferenceHandler.getPreference(PreferenceHandler.KEY_BEST_PREVIEW_RATIO));
+		bestPreviewRatio++;
+		if(previewHeight*bestPreviewRatio <= pictureHeight){
+			String avoidIncreasingBPR = preferenceHandler.getPreference(PreferenceHandler.KEY_AVOID_INCREASING_BPR);
+			if(avoidIncreasingBPR != null && avoidIncreasingBPR.equals(PreferenceHandler.VALUE_FALSE)){
+				Log.d("CAMERA", "Increasing bestPreviewRatio to "+String.valueOf(bestPreviewRatio));
+				preferenceHandler.setPreference(PreferenceHandler.KEY_BEST_PREVIEW_RATIO, String.valueOf(bestPreviewRatio));
+			}
+			else if(avoidIncreasingBPR != null && avoidIncreasingBPR.equals(PreferenceHandler.VALUE_TRUE))
+				Log.d("CAMERA", "Cannot increase bestPreviewRatio to avoid app from crushing");
+		}
+		else{
+			Log.d("CAMERA", "Cannot increase bestPreviewRatio to "+String.valueOf(bestPreviewRatio));
+		}
+	}
+	
+	private void showLastCapture(Bitmap lastCapture, String operatorName, String result){
+		//Show captured image
+		if(countDownTimer == null) {
+			countDownTimer = new CountDownTimer(750,750) {
+				
+				@Override
+				public void onTick(long millisUntilFinished) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onFinish() {
+					lastImageIV.setVisibility(ImageView.GONE);
+				}
+			};
+		}
+		lastImageIV.setImageBitmap(lastCapture);
+		lastImageIV.setVisibility(ImageView.VISIBLE);
+		countDownTimer.start();
+		
+		//save image
+		SampleSaver sampleSaver = new SampleSaver(operatorName.trim(), result.length());
+		sampleSaver.execute(lastCapture);
 	}
 }

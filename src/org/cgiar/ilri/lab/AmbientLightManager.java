@@ -47,11 +47,11 @@ public class AmbientLightManager implements SensorEventListener {
 		float ambientLightLux = sensorEvent.values[0];
 		if(preview != null){
 			if(ambientLightLux<=TOO_DARK_LUX){
-				Log.d("CAMERA", "Too dark, trying to start flashlight");
+				Log.d("AMBIENCE", "Too dark, trying to start flashlight");
 				preview.setTorch(true);
 			}
 			else if(ambientLightLux >= BRIGHT_ENOUGH_LUX){
-				Log.d("CAMERA", "Bright enough, turning off flashlight");
+				Log.d("AMBIENCE", "Bright enough, turning off flashlight");
 				preview.setTorch(false);
 			}
 		}
